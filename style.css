@@ -1,4 +1,4 @@
-:root {
+j:root {
     --bg-oatmeal: #F7F4EB;
     --text-espresso: #3A2618;
     --accent-caramel: #C28E5C;
@@ -276,7 +276,6 @@ h1 {
 }
 
 #customer-view {
-    position: relative;
     overflow: hidden;
 }
 
