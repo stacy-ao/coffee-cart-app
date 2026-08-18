@@ -231,18 +231,47 @@ h1 {
     transform: scale(1) rotate(0deg);
 }
 
+/* Sunset / Sunrise label
+   Instead of hard-coding the text in HTML, we hide the native text and provide
+   a CSS-generated label that switches between "SUNRISE MODE" (light) and
+   "SUNSET MODE" (dark) depending on the html.sunset-mode class. This keeps
+   the toggle purely style-driven and works without JS changes. */
 .sunset-label {
+    /* keep accessible text in DOM for screen readers, but make original
+       text invisible visually so our generated text shows instead */
+    color: transparent;
+    position: relative;
     font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--text-espresso);
     opacity: 0.55;
     transition: var(--theme-transition), opacity 0.3s ease;
     white-space: nowrap;
 }
 
-.sunset-toggle input:checked ~ .sunset-label {
+.sunset-label::after {
+    content: "SUNRISE MODE";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--text-espresso);
+    opacity: 0.55;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: inherit;
+}
+
+/* When in sunset (dark) mode show "SUNSET MODE" */
+html.sunset-mode .sunset-label::after {
+    content: "SUNSET MODE";
+    color: var(--text-espresso);
+}
+
+/* Respect the existing checked visual state that changes color/opacity */
+.sunset-toggle input:checked ~ .sunset-label::after {
     opacity: 0.85;
     color: var(--accent-caramel);
 }
