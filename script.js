@@ -23,6 +23,9 @@ let state = {
     featuredDrink: { ...DEFAULT_FEATURED_DRINK }
 };
 
+// Cart state
+let cartState = { items: [] };
+
 const SUNSET_STORAGE_KEY = 'coffeeCartSunsetMode';
 
 // DOM Elements
@@ -71,8 +74,10 @@ let parallaxInitialized = false;
 // Initialize
 function init() {
     loadSunsetMode();
+    setTodayDate();
     routeView();
     loadData();
+    loadCartFromStorage();
     setupEventListeners();
     render();
     setupParallax();
@@ -217,6 +222,63 @@ function setupEventListeners() {
     });
 
     setupMpesaModal();
+
+    // Cart: delegation for Add buttons
+    if (customerMenuList) {
+        customerMenuList.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('.btn-add');
+            if (!btn) return;
+            const id = btn.getAttribute('data-id');
+            if (!id) return;
+            const item = state.menu.find(m => String(m.id) === String(id));
+            if (!item) return;
+            addToCart(item);
+        });
+    }
+
+    // Floating cart and drawer
+    const floatingCartBtn = document.getElementById('floating-cart');
+    const cartModal = document.getElementById('cart-modal');
+    const cartBackdrop = document.getElementById('cart-backdrop');
+    const cartClose = document.getElementById('cart-close');
+    const placeOrderBtn = document.getElementById('place-order');
+
+    if (floatingCartBtn) floatingCartBtn.addEventListener('click', openCart);
+    if (cartBackdrop) cartBackdrop.addEventListener('click', closeCart);
+    if (cartClose) cartClose.addEventListener('click', closeCart);
+    if (placeOrderBtn) {
+        placeOrderBtn.addEventListener('click', () => {
+            if (cartState.items.length === 0) return;
+            alert(`Order placed! Total: ${formatPrice(cartTotal())}`);
+            cartState.items = [];
+            saveCartToStorage();
+            updateCartBadge();
+            renderCartItems();
+            closeCart();
+        });
+    }
+
+    // Cart drawer controls (increase / decrease / remove) — delegated
+    const cartItemsContainer = document.getElementById('cart-items');
+    if (cartItemsContainer) {
+        cartItemsContainer.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('button[data-action]');
+            if (!btn) return;
+            const id = btn.getAttribute('data-id');
+            const action = btn.getAttribute('data-action');
+            if (action === 'increase') changeQty(id, 1);
+            else if (action === 'decrease') changeQty(id, -1);
+            else if (action === 'remove') removeFromCart(id);
+        });
+    }
+
+    // keyboard escape to close cart
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeCart();
+            if (mpesaModal && !mpesaModal.hidden) closeMpesaModal();
+        }
+    });
 }
 
 function setupMpesaModal() {
@@ -345,6 +407,111 @@ function setupParallax() {
     parallaxInitialized = true;
 }
 
+// ======= Cart helpers =======
+function money(n) {
+    return `KSh ${Number(n || 0).toFixed(2)}`;
+}
+
+function findCartIndex(id) {
+    return cartState.items.findIndex(i => String(i.id) === String(id));
+}
+
+function updateCartBadge() {
+    const count = cartState.items.reduce((s, it) => s + it.qty, 0);
+    const badge = document.getElementById('cart-count');
+    if (badge) badge.textContent = count;
+}
+
+function saveCartToStorage() {
+    try { localStorage.setItem('coffee_cart', JSON.stringify(cartState.items)); } catch(e){}
+}
+function loadCartFromStorage() {
+    try {
+        const raw = localStorage.getItem('coffee_cart');
+        if (raw) cartState.items = JSON.parse(raw);
+    } catch(e) { cartState.items = []; }
+}
+
+function addToCart(menuItem) {
+    const idx = findCartIndex(menuItem.id);
+    if (idx > -1) {
+        cartState.items[idx].qty += 1;
+    } else {
+        cartState.items.push({ id: menuItem.id, name: menuItem.name, price: menuItem.price, qty: 1 });
+    }
+    saveCartToStorage();
+    updateCartBadge();
+    renderCartItems();
+}
+
+function removeFromCart(id) {
+    const idx = findCartIndex(id);
+    if (idx > -1) {
+        cartState.items.splice(idx, 1);
+        saveCartToStorage();
+        updateCartBadge();
+        renderCartItems();
+    }
+}
+
+function changeQty(id, delta) {
+    const idx = findCartIndex(id);
+    if (idx > -1) {
+        cartState.items[idx].qty = Math.max(0, cartState.items[idx].qty + delta);
+        if (cartState.items[idx].qty === 0) cartState.items.splice(idx, 1);
+        saveCartToStorage();
+        updateCartBadge();
+        renderCartItems();
+    }
+}
+
+function cartTotal() {
+    return cartState.items.reduce((s, it) => s + (it.price * it.qty), 0);
+}
+
+function renderCartItems() {
+    const container = document.getElementById('cart-items');
+    const cartTotalEl = document.getElementById('cart-total');
+    if (!container) return;
+    if (cartState.items.length === 0) {
+        container.innerHTML = `<p class="cart-empty">Your cart is empty — add something tasty ☕️</p>`;
+        if (cartTotalEl) cartTotalEl.textContent = money(0);
+        return;
+    }
+
+    container.innerHTML = cartState.items.map(it => `
+      <div class="cart-item" data-id="${it.id}">
+        <div class="meta">
+          <div class="name">${it.name}</div>
+          <div class="qty">Quantity: ${it.qty} • ${money(it.price)} each</div>
+        </div>
+        <div class="controls">
+          <button class="small-btn" data-action="decrease" data-id="${it.id}">−</button>
+          <div class="qty-display">${it.qty}</div>
+          <button class="small-btn" data-action="increase" data-id="${it.id}">+</button>
+          <button class="small-btn" data-action="remove" data-id="${it.id}">✕</button>
+        </div>
+      </div>
+    `).join('');
+
+    if (cartTotalEl) cartTotalEl.textContent = money(cartTotal());
+}
+
+function openCart() {
+    const cartModal = document.getElementById('cart-modal');
+    if (!cartModal) return;
+    cartModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+    renderCartItems();
+}
+function closeCart() {
+    const cartModal = document.getElementById('cart-modal');
+    if (!cartModal) return;
+    cartModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+}
+
+// ======= Render (menu) =======
 function render() {
     // Render Location
     displayLocation.textContent = state.location;
@@ -403,7 +570,10 @@ function render() {
                         ${item.soldOut ? '<span class="sold-out-badge">Sold Out</span>' : ''}
                     </span>
                 </div>
-                <span class="item-price">${formatPrice(item.price)}</span>
+                <div class="item-actions">
+                    <span class="item-price">${formatPrice(item.price)}</span>
+                    ${item.soldOut ? '' : `<button class="btn-add" data-id="${item.id}" type="button">Add</button>`}
+                </div>
             `;
 
             const img = li.querySelector('.menu-item-image');
@@ -461,6 +631,18 @@ function render() {
 
     applyFloatDelays();
     setupScrollReveal();
+
+    // ensure cart badge and items reflect state
+    updateCartBadge();
+    renderCartItems();
+}
+
+function setTodayDate() {
+    const dateEl = document.getElementById('today-date');
+    if (!dateEl) return;
+    const now = new Date();
+    const opts = { weekday: 'long', month: 'short', day: 'numeric' };
+    dateEl.textContent = now.toLocaleDateString(undefined, opts);
 }
 
 // Run app
