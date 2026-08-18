@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cozy Coffee Cart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        if (localStorage.getItem('coffeeCartSunsetMode') === 'true') {
+            document.documentElement.classList.add('sunset-mode');
+        }
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="header-top">
+                <h1>Cozy Coffee Cart</h1>
+                <label class="sunset-toggle" aria-label="Toggle Sunset Mode">
+                    <input type="checkbox" id="sunset-toggle">
+                    <span class="sunset-track">
+                        <span class="sunset-sky">
+                            <span class="sunset-star"></span>
+                            <span class="sunset-star"></span>
+                            <span class="sunset-star"></span>
+                        </span>
+                        <span class="sunset-thumb">
+                            <span class="sunset-icon sun"></span>
+                            <span class="sunset-icon moon"></span>
+                        </span>
+                    </span>
+                    <span class="sunset-label">Sunset Mode</span>
+                </label>
+            </div>
+        </header>
+
+        <main class="view-wrapper">
+            <!-- Customer View -->
+            <section id="customer-view" class="view-section active">
+                <div class="parallax-bg" aria-hidden="true">
+                    <span class="parallax-shape shape-1"></span>
+                    <span class="parallax-shape shape-2"></span>
+                    <span class="parallax-shape shape-3"></span>
+                </div>
+
+                <div id="vibe-banner" class="vibe-banner is-hidden" hidden>
+                    <span class="vibe-banner-label">Vibe of the Day</span>
+                    <p id="display-daily-message" class="vibe-banner-text"></p>
+                </div>
+
+                <article class="featured-drink-card scroll-reveal" id="featured-drink-card">
+                    <span class="featured-badge">Drink of the Day</span>
+                    <div class="featured-image-wrap float-idle">
+                        <div class="steam" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <img id="featured-drink-image" class="float-target" src="https://images.unsplash.com/photo-1517701609419-4be865a86121?auto=format&fit=crop&w=800&q=80" alt="">
+                    </div>
+                    <div class="featured-content">
+                        <div class="featured-header">
+                            <h2 id="featured-drink-name" class="featured-title"></h2>
+                            <span id="featured-drink-price" class="featured-price"></span>
+                        </div>
+                        <p id="featured-drink-description" class="featured-description"></p>
+                    </div>
+                </article>
+
+                <div class="location-display-container">
+                    <p class="location-label">We are currently pouring at:</p>
+                    <h2 id="display-location">Location loading...</h2>
+                </div>
+                
+                <div class="menu-display-container">
+                    <h3 class="font-display">Today's Menu</h3>
+                    <ul id="customer-menu-list" class="menu-list">
+                        <!-- Menu items will be injected here -->
+                    </ul>
+                </div>
+
+                <footer class="customer-footer">
+                    <a href="https://instagram.com/yourcoffeecart" class="footer-link" target="_blank" rel="noopener noreferrer">
+                        <svg class="footer-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                            <circle cx="12" cy="12" r="4.25" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                            <circle cx="17.5" cy="6.5" r="1.25" fill="currentColor"/>
+                        </svg>
+                        Follow us on IG
+                    </a>
+                    <button type="button" id="mpesa-tip-btn" class="footer-link footer-link-btn">
+                        <svg class="footer-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 8.5c1.2-1.1 2.5-2.4 3.4-4.2.6 3.6 1.5 5.2 3.2 7.1 1.4-2.8 2.4-5.8 3-9.4 2.4 4.2 5.2 8.3 8.4 11.5-2.5.3-4.7-.2-6.5-2.1-1.3 2.1-3.4 3.4-6.2 3.7C7.8 14.8 6.8 12.1 6 8.5z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                        </svg>
+                        Buy the Barista a Coffee
+                    </button>
+                </footer>
+            </section>
+
+            <!-- Owner View -->
+            <section id="owner-view" class="view-section">
+                <div class="owner-card">
+                    <h3>Vibe of the Day</h3>
+                    <form id="daily-message-form">
+                        <label for="daily-message-input" class="field-label">Daily Message</label>
+                        <input type="text" id="daily-message-input" placeholder="e.g., Slow morning, extra cozy pours today">
+                        <button type="submit" class="btn-primary">Update Message</button>
+                    </form>
+                </div>
+
+                <div class="owner-card">
+                    <h3>Featured Drink of the Day</h3>
+                    <form id="featured-drink-form">
+                        <label for="featured-name-input" class="field-label">Featured Drink Name</label>
+                        <input type="text" id="featured-name-input" placeholder="e.g., Iced Matcha Latte">
+                        <label for="featured-price-input" class="field-label">Price</label>
+                        <input type="number" id="featured-price-input" placeholder="e.g., 550" step="1" min="0">
+                        <label for="featured-description-input" class="field-label">Description</label>
+                        <input type="text" id="featured-description-input" placeholder="e.g., Ceremonial matcha with oat milk over ice">
+                        <label for="featured-image-input" class="field-label">Image URL</label>
+                        <input type="url" id="featured-image-input" placeholder="Leave empty for default matcha photo">
+                        <button type="submit" class="btn-primary">Update Featured Drink</button>
+                    </form>
+                </div>
+
+                <div class="owner-card">
+                    <h3>Set Location</h3>
+                    <form id="location-form">
+                        <input type="text" id="location-input" placeholder="e.g., Central Park" required>
+                        <button type="submit" class="btn-primary">Update Location</button>
+                    </form>
+                </div>
+
+                <div class="owner-card">
+                    <h3>Add Menu Item</h3>
+                    <form id="add-item-form">
+                        <input type="text" id="item-name" placeholder="Item Name (e.g., Oat Latte)" required>
+                        <input type="number" id="item-price" placeholder="Price (e.g., 350)" step="1" min="0" required>
+                        <button type="submit" class="btn-primary">Add Item</button>
+                    </form>
+                </div>
+
+                <div class="owner-card">
+                    <h3>Manage Menu</h3>
+                    <ul id="owner-menu-list" class="menu-list owner-list">
+                        <!-- Menu items will be injected here -->
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="mpesa-modal" class="modal" hidden aria-hidden="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="mpesa-modal-title">
+            <button type="button" class="modal-close" id="mpesa-modal-close" aria-label="Close">&times;</button>
+
+            <div id="mpesa-form-view">
+                <h2 id="mpesa-modal-title" class="modal-title">Support with M-Pesa</h2>
+                <form id="mpesa-form" class="modal-form">
+                    <label for="mpesa-phone" class="field-label">Phone number</label>
+                    <input type="tel" id="mpesa-phone" placeholder="07XX XXX XXX" inputmode="tel" autocomplete="tel">
+                    <button type="submit" id="mpesa-send-btn" class="btn-primary">Send Prompt</button>
+                </form>
+            </div>
+
+            <div id="mpesa-success-view" class="modal-success" hidden>
+                <div class="modal-success-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                        <path d="M8 12.5l2.5 2.5L16 9.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <p class="modal-success-text">M-Pesa prompt sent to your phone! Please enter your PIN.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
