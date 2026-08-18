@@ -232,6 +232,8 @@ function setupEventListeners() {
             if (!id) return;
             const item = state.menu.find(m => String(m.id) === String(id));
             if (!item) return;
+            // animate then add
+            animateAddToCart(btn);
             addToCart(item);
         });
     }
@@ -279,6 +281,62 @@ function setupEventListeners() {
             if (mpesaModal && !mpesaModal.hidden) closeMpesaModal();
         }
     });
+}
+
+function animateAddToCart(triggerBtn) {
+    try {
+        const itemEl = triggerBtn.closest('.menu-item');
+        if (!itemEl) return;
+        const img = itemEl.querySelector('img');
+        if (!img) return;
+
+        const cartBtn = document.getElementById('floating-cart');
+        if (!cartBtn) return;
+
+        const imgRect = img.getBoundingClientRect();
+        const cartRect = cartBtn.getBoundingClientRect();
+
+        const clone = img.cloneNode(true);
+        clone.classList.add('fly-img');
+        clone.style.width = `${imgRect.width}px`;
+        clone.style.height = `${imgRect.height}px`;
+        clone.style.left = `${imgRect.left}px`;
+        clone.style.top = `${imgRect.top}px`;
+        clone.style.opacity = '1';
+
+        document.body.appendChild(clone);
+
+        // Force paint
+        clone.getBoundingClientRect();
+
+        const translateX = cartRect.left + cartRect.width/2 - (imgRect.left + imgRect.width/2);
+        const translateY = cartRect.top + cartRect.height/2 - (imgRect.top + imgRect.height/2);
+        const scale = 0.18; // shrink to badge
+
+        clone.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        clone.style.opacity = '0.9';
+
+        // pulse the cart badge
+        const badge = document.getElementById('cart-count');
+        if (badge) {
+            badge.classList.remove('pulse');
+            // force reflow to restart
+            void badge.offsetWidth;
+            badge.classList.add('pulse');
+        }
+
+        // cleanup after animation
+        clone.addEventListener('transitionend', () => {
+            clone.style.opacity = '0';
+            setTimeout(() => {
+                if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+            }, 200);
+        }, { once: true });
+
+    } catch (e) {
+        // graceful fail
+        console.warn('Add-to-cart animation failed', e);
+    }
 }
 
 function setupMpesaModal() {

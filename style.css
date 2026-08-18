@@ -153,3 +153,27 @@
         width: calc(100% - 16px);
     }
 }
+
+/* Fly-to-cart animation element */
+.fly-img {
+    position: fixed;
+    z-index: 2500;
+    pointer-events: none;
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(10,8,6,0.25);
+    transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+    will-change: transform, opacity;
+}
+
+/* badge pulse */
+@keyframes badgePulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+.cart-badge.pulse {
+    animation: badgePulse 420ms ease-in-out;
+}
