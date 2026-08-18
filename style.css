@@ -37,7 +37,8 @@ html.sunset-mode {
     --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.45);
     --sold-out-bg: rgba(36, 28, 24, 0.7);
     --sold-out-text: #9a8a7e;
-    --input-bg: #221A16;
+    --input-bg: #1A1210;
+    --input-border: rgba(240, 230, 216, 0.2);
     --btn-primary-text: #1A1210;
     --btn-delete-bg: #4a2020;
     --btn-delete-text: #ff8a8a;
