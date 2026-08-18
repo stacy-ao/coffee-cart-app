@@ -1,9 +1,8 @@
-/* Fixed typo: changed `j:root` to `:root` so CSS variables load in light mode */
 :root {
     --bg-oatmeal: #F7F4EB;
     --text-espresso: #3A2618;
     --accent-caramel: #C28E5C;
-    --accent-cream: #FFFFFF;
+    --accent-cream: #FFFDF8;
     --border-soft: rgba(58, 38, 24, 0.1);
     --shadow-soft: 0 4px 15px rgba(58, 38, 24, 0.05);
     --shadow-hover: 0 8px 25px rgba(58, 38, 24, 0.08);
@@ -88,7 +87,8 @@ body {
 /* Header & Toggle */
 header {
     text-align: center;
-    margin-bottom: 30px;
+    /* reduced gap under header for owner view */
+    margin-bottom: 12px;
     padding-top: 10px;
 }
 
@@ -97,7 +97,7 @@ header {
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 h1 {
@@ -280,7 +280,6 @@ h1 {
 }
 
 #customer-view {
-    position: relative;
     overflow: hidden;
 }
 
